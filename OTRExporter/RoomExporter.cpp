@@ -76,8 +76,8 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
                 writer->Write(entry.posX);
                 writer->Write(entry.posY);
                 writer->Write(entry.posZ);
-                writer->Write(entry.rotY);
-                writer->Write(entry.initVar);
+                writer->Write((int16_t)OotToMm::SpawnRotation(entry.rotY, 0x7F));
+                writer->Write(OotToMm::TransitionParams(entry.actorNum, entry.initVar));
             }
         }
             break;
@@ -417,9 +417,9 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
                 writer->Write(entry.posX);
                 writer->Write(entry.posY);
                 writer->Write(entry.posZ);
-                writer->Write(entry.rotX);
-                writer->Write(entry.rotY);
-                writer->Write(entry.rotZ);
+                writer->Write(OotToMm::SpawnRotation(entry.rotX, 0));
+                writer->Write(OotToMm::SpawnRotation(entry.rotY, 0x7F));
+                writer->Write(OotToMm::SpawnRotation(entry.rotZ, 0));
                 writer->Write(entry.params);
             }
         }

@@ -24,10 +24,19 @@ extern bool enabled;
 
 // Scene
 
-// Return their input unless enabled, so exporters can call them for either game.
-// TODO: remap to the unified actor and object tables once OoT variants exist (suffixed _Oot).
+// These return their input unless enabled, so exporters can call them for either game.
+
+// Maps actors MM already has an equivalent of (so far the room-loading planes). Other ids pass
+// through. TODO: remap to the unified actor and object tables once OoT variants exist (suffixed _Oot).
 uint16_t ActorId(uint16_t ootActorId);
 uint16_t ObjectId(uint16_t ootObjectId);
+
+// Spawn entries in MM store rotations as whole degrees in bits 7-15, with a cutscene id or half-day
+// bits below. OoT stores binary angles. Used for start positions and transition actors.
+// TODO: room actor lists still hold OoT angles, which some OoT actors use as extra parameters.
+uint16_t SpawnRotation(uint16_t ootAngle, uint8_t lowBits);
+// Converts a transition actor's parameters to its MM equivalent's layout.
+uint16_t TransitionParams(uint16_t ootActorId, uint16_t ootParams);
 
 void WriteRoomBehavior(BinaryWriter* writer, SetRoomBehavior* cmd);
 void WriteMiscSettings(BinaryWriter* writer, SetCameraSettings* cmd);

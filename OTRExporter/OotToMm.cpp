@@ -17,11 +17,45 @@ namespace OotToMm {
 
 bool enabled = false;
 
+namespace {
+constexpr uint16_t OOT_ACTOR_EN_HOLL = 0x0023;
+constexpr uint16_t MM_ACTOR_EN_HOLL = 0x0018;
+} // namespace
+
 uint16_t ActorId(uint16_t ootActorId) {
     if (!enabled) {
         return ootActorId;
     }
-    return ootActorId;
+    switch (ootActorId) {
+        case OOT_ACTOR_EN_HOLL:
+            return MM_ACTOR_EN_HOLL;
+        default:
+            return ootActorId;
+    }
+}
+
+uint16_t SpawnRotation(uint16_t ootAngle, uint8_t lowBits) {
+    if (!enabled) {
+        return ootAngle;
+    }
+    uint32_t degrees = ((uint32_t)ootAngle * 360 + 0x8000) / 0x10000 % 360;
+    return (uint16_t)((degrees << 7) | (lowBits & 0x7F));
+}
+
+uint16_t TransitionParams(uint16_t ootActorId, uint16_t ootParams) {
+    if (!enabled || ootActorId != OOT_ACTOR_EN_HOLL) {
+        return ootParams;
+    }
+    // OoT keeps the type in bits 6-8 and a switch flag below; MM keeps the type in bits 7-9 and an
+    // exit index below (MM fills in the transition actor index above them when spawning).
+    // TODO: OoT's switch-flag hall (3) has no MM counterpart and becomes a plain visible one.
+    static const uint8_t sMmTypes[8] = {
+        /* ENHOLL_H_VISIBLE_NARROW */ 0,       /* ENHOLL_V_DOWN_BGCOVER_LARGE */ 3,
+        /* ENHOLL_V_INVISIBLE */ 1,            /* ENHOLL_H_BGCOVER_SWITCHFLAG */ 0,
+        /* ENHOLL_H_INVISIBLE */ 2,            /* ENHOLL_V_BGCOVER */ 3,
+        /* ENHOLL_H_INVISIBLE_NARROW */ 2,     /* unused */ 0,
+    };
+    return (uint16_t)(sMmTypes[(ootParams >> 6) & 7] << 7);
 }
 
 uint16_t ObjectId(uint16_t ootObjectId) {
