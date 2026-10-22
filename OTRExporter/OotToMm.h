@@ -38,6 +38,9 @@ uint16_t SpawnRotation(uint16_t ootAngle, uint8_t lowBits);
 // Converts a transition actor's parameters to its MM equivalent's layout.
 uint16_t TransitionParams(uint16_t ootActorId, uint16_t ootParams);
 
+// Maps an OoT camera setting (collision camera data) to MM's, whose list is ordered differently.
+int16_t CameraSetting(int16_t ootSetting);
+
 void WriteRoomBehavior(BinaryWriter* writer, SetRoomBehavior* cmd);
 void WriteMiscSettings(BinaryWriter* writer, SetCameraSettings* cmd);
 // Rewrites the command id already written for this command, so call it right after that id.

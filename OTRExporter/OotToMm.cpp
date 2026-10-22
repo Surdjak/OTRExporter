@@ -65,6 +65,86 @@ uint16_t ObjectId(uint16_t ootObjectId) {
     return ootObjectId;
 }
 
+int16_t CameraSetting(int16_t ootSetting) {
+    if (!enabled) {
+        return ootSetting;
+    }
+    // Matched by each setting's original name, given after the OoT name, and by what it does. Settings
+    // MM has no counterpart for fall back to a general one and are marked TODO.
+    static const int16_t sMmSettings[] = {
+        /* 0x00 NONE                      */ 0x00, // NONE
+        /* 0x01 NORMAL0                   */ 0x01, // NORMAL0
+        /* 0x02 NORMAL1                   */ 0x0C, // NORMAL1
+        /* 0x03 DUNGEON0                  */ 0x11, // DUNGEON0
+        /* 0x04 DUNGEON1                  */ 0x1E, // DUNGEON1
+        /* 0x05 NORMAL3                   */ 0x02, // NORMAL3
+        /* 0x06 HORSE0                    */ 0x04, // HORSE
+        /* 0x07 BOSS_GOMA                 */ 0x11, // TODO: OoT boss arenas use DUNGEON0
+        /* 0x08 BOSS_DODO                 */ 0x11,
+        /* 0x09 BOSS_BARI                 */ 0x11,
+        /* 0x0A BOSS_FGANON               */ 0x11,
+        /* 0x0B BOSS_BAL                  */ 0x11,
+        /* 0x0C BOSS_SHADES               */ 0x11,
+        /* 0x0D BOSS_MOFA                 */ 0x11,
+        /* 0x0E TWIN0                     */ 0x11,
+        /* 0x0F TWIN1                     */ 0x11,
+        /* 0x10 BOSS_GANON1               */ 0x11,
+        /* 0x11 BOSS_GANON2               */ 0x11,
+        /* 0x12 TOWER0                    */ 0x28, // TOWER_ASCENT
+        /* 0x13 TOWER1                    */ 0x28, // TOWER_ASCENT
+        /* 0x14 FIXED0                    */ 0x0F, // FIXED0
+        /* 0x15 FIXED1                    */ 0x1F, // FIXED1
+        /* 0x16 CIRCLE0                   */ 0x0E, // CIRCLE0
+        /* 0x17 CIRCLE2                   */ 0x24, // CIRCLE2
+        /* 0x18 CIRCLE3                   */ 0x25, // CIRCLE3
+        /* 0x19 PREREND0                  */ 0x06, // PREREND_FIXED
+        /* 0x1A PREREND1                  */ 0x07, // PREREND_PIVOT
+        /* 0x1B PREREND3                  */ 0x07, // TODO: MM has no side-scrolling prerendered camera
+        /* 0x1C DOOR0                     */ 0x08, // DOORC
+        /* 0x1D DOORC                     */ 0x08, // DOORC
+        /* 0x1E RAIL3 (crawlspace)        */ 0x01, // TODO: MM has no crawlspace camera
+        /* 0x1F START0                    */ 0x2C, // START0
+        /* 0x20 START1                    */ 0x56, // START1
+        /* 0x21 FREE0                     */ 0x0A, // FREE0
+        /* 0x22 FREE2                     */ 0x0A, // FREE0
+        /* 0x23 CIRCLE4                   */ 0x26, // CIRCLE4
+        /* 0x24 CIRCLE5                   */ 0x03, // PIVOT_DIVING
+        /* 0x25 DEMO0                     */ 0x09, // DEMO0
+        /* 0x26 DEMO1                     */ 0x09, // DEMO0
+        /* 0x27 MORI1                     */ 0x0B, // BIRDS_EYE_VIEW_0
+        /* 0x28 ITEM0 (slow chest)        */ 0x1A, // LONG_CHEST_OPENING
+        /* 0x29 ITEM1                     */ 0x12, // ITEM0
+        /* 0x2A DEMO3                     */ 0x09, // DEMO0
+        /* 0x2B DEMO4                     */ 0x1C, // ATTENTION
+        /* 0x2C UFOBEAN                   */ 0x01, // TODO: MM has no magic bean ride camera
+        /* 0x2D LIFTBEAN                  */ 0x01,
+        /* 0x2E SCENE0                    */ 0x50, // SCENE0
+        /* 0x2F SCENE1                    */ 0x50, // SCENE0
+        /* 0x30 HIDAN1                    */ 0x11, // TODO: Fire and Forest Temple cameras use DUNGEON0
+        /* 0x31 HIDAN2                    */ 0x11,
+        /* 0x32 MORI2                     */ 0x11,
+        /* 0x33 MORI3                     */ 0x11,
+        /* 0x34 TAKO                      */ 0x37, // MINI_BOSS
+        /* 0x35 SPOT05A                   */ 0x3C, // BIRDS_EYE_VIEW_1
+        /* 0x36 SPOT05B                   */ 0x3C, // BIRDS_EYE_VIEW_1
+        /* 0x37 HIDAN3                    */ 0x3C, // BIRDS_EYE_VIEW_1
+        /* 0x38 ITEM2                     */ 0x14, // ITEM2
+        /* 0x39 PIVOT_VERTICAL            */ 0x3B, // CIRCLE8, used for moving platforms
+        /* 0x3A NORMAL2                   */ 0x4A, // NORMAL2
+        /* 0x3B FISHING                   */ 0x01, // TODO: MM has no fishing pond camera
+        /* 0x3C DEMOC                     */ 0x09, // DEMO0
+        /* 0x3D UO_FIBER                  */ 0x11, // TODO: Jabu-Jabu tentacle rooms use DUNGEON0
+        /* 0x3E DUNGEON2                  */ 0x32, // DUNGEON2
+        /* 0x3F TEPPEN                    */ 0x01, // TODO: MM has no fixed-yaw camera
+        /* 0x40 CIRCLE7                   */ 0x36, // CIRCLE7
+        /* 0x41 NORMAL4                   */ 0x58, // NORMAL4
+    };
+    if (ootSetting < 0 || ootSetting >= (int16_t)(sizeof(sMmSettings) / sizeof(sMmSettings[0]))) {
+        return ootSetting;
+    }
+    return sMmSettings[ootSetting];
+}
+
 void WriteRoomBehavior(BinaryWriter* writer, SetRoomBehavior* cmd) {
     // ZAPD splits the OoT command's second word into MM's fields for both games. OoT never sets the
     // point light and E2 bits. TODO: map OoT behavior types 1 and 2 onto MM's values.

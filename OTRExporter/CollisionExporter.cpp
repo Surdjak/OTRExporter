@@ -1,4 +1,5 @@
 #include "CollisionExporter.h"
+#include "OotToMm.h"
 #include <libultraship/bridge.h>
 
 void OTRExporter_Collision::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
@@ -56,7 +57,7 @@ void OTRExporter_Collision::Save(ZResource* res, const fs::path& outPath, Binary
 		if (camPosDecl != nullptr)
 			idx = ((entry.cameraPosDataSeg & 0x00FFFFFF) - camPosDecl->address) / 6;
 		
-		writer->Write(entry.cameraSType);
+		writer->Write(OotToMm::CameraSetting(entry.cameraSType));
 		writer->Write(entry.numData);
 		writer->Write((uint32_t)idx);
 	}
