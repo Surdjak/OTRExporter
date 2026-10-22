@@ -1,5 +1,7 @@
 #include "CutsceneExporter.h"
 #include "Globals.h"
+#include "OotToMm.h"
+#include <Utils/MemoryStream.h>
 #include <libultraship/bridge.h>
 
 void OTRExporter_Cutscene::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer) {
@@ -11,9 +13,24 @@ void OTRExporter_Cutscene::Save(ZResource* res, const fs::path& outPath, BinaryW
 
     const auto currentStream = writer->GetBaseAddress();
 
-    writer->Write(CS_BEGIN_CUTSCENE(cs->numCommands, cs->endFrame));
+    if (OotToMm::enabled) {
+        // The command count leads the commands, so write them to a side stream first.
+        MemoryStream* cmdStream = new MemoryStream();
+        BinaryWriter cmdWriter = BinaryWriter(cmdStream);
+        uint32_t numCommands = OotToMm::WriteCutsceneCommands(&cmdWriter, cs);
+        std::vector<char> cmdData = cmdStream->ToVector();
 
-    if (Globals::Instance->game == ZGame::MM_RETAIL) {
+        writer->Write(CS_BEGIN_CUTSCENE((int32_t)numCommands, cs->endFrame));
+        if (!cmdData.empty()) {
+            writer->Write(cmdData.data(), cmdData.size());
+        }
+    } else {
+        writer->Write(CS_BEGIN_CUTSCENE(cs->numCommands, cs->endFrame));
+    }
+
+    if (OotToMm::enabled) {
+        // Commands were written above.
+    } else if (Globals::Instance->game == ZGame::MM_RETAIL) {
         SaveMM(cs, writer);
     } else {
         SaveOot(cs, writer);

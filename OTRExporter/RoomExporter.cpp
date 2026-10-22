@@ -33,6 +33,7 @@
 #include "Main.h"
 #include <ZRoom/Commands/SetCutscenes.h>
 #include "CutsceneExporter.h"
+#include "OotToMm.h"
 #include <ZRoom/Commands/SetTransitionActorList.h>
 #include <ZRoom/Commands/SetCutsceneEntryList.h>
 #include <ZRoom/Commands/SetAnimatedMaterialList.h>
@@ -71,7 +72,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
                 writer->Write(entry.frontTransitionReaction);
                 writer->Write(entry.backObjectRoom);
                 writer->Write(entry.backTransitionReaction);
-                writer->Write(entry.actorNum);
+                writer->Write(OotToMm::ActorId(entry.actorNum));
                 writer->Write(entry.posX);
                 writer->Write(entry.posY);
                 writer->Write(entry.posZ);
@@ -90,7 +91,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 
             for (const auto& entry : cmdSetActorList->actorList->actors)
             {
-                writer->Write(entry.actorNum);
+                writer->Write(OotToMm::ActorId(entry.actorNum));
                 writer->Write(entry.posX);
                 writer->Write(entry.posY);
                 writer->Write(entry.posZ);
@@ -165,6 +166,8 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
                 writer->Write(cmdRoom->msgCtxUnk);
                 writer->Write(cmdRoom->enablePosLights);
                 writer->Write(cmdRoom->kankyoContextUnkE2);
+            } else if (OotToMm::enabled) {
+                OotToMm::WriteRoomBehavior(writer, cmdRoom);
             } else {
                 writer->Write((uint8_t)cmdRoom->gameplayFlags); // 0x01
                 writer->Write(cmdRoom->gameplayFlags2); // 0x04
@@ -276,7 +279,9 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
         case RoomCommand::SetCameraSettings:
         //case RoomCommand::SetWorldMapVisited: MM command but you can't have 0x19 twice in a switch
         {
-            if (Globals::Instance->game != ZGame::MM_RETAIL) {
+            if (Globals::Instance->game != ZGame::MM_RETAIL && OotToMm::enabled) {
+                OotToMm::WriteMiscSettings(writer, (SetCameraSettings*)cmd);
+            } else if (Globals::Instance->game != ZGame::MM_RETAIL) {
                 SetCameraSettings* cmdCam = (SetCameraSettings*)cmd;
 
                 writer->Write((uint8_t)cmdCam->cameraMovement); // 0x01
@@ -408,7 +413,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 
             for (const ActorSpawnEntry& entry : cmdStartPos->actors)
             {
-                writer->Write(entry.actorNum);
+                writer->Write(OotToMm::ActorId(entry.actorNum));
                 writer->Write(entry.posX);
                 writer->Write(entry.posY);
                 writer->Write(entry.posZ);
@@ -457,7 +462,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
             writer->Write((uint32_t)cmdSetObjectList->objects.size());
 
             for (size_t i = 0; i < cmdSetObjectList->objects.size(); i++)
-                writer->Write(cmdSetObjectList->objects[i]);
+                writer->Write(OotToMm::ObjectId(cmdSetObjectList->objects[i]));
         }
             break;
         case RoomCommand::SetCutscenes:
@@ -485,6 +490,9 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 
                     AddFile(fName, csStream->ToVector());
                 }
+            }
+            else if (OotToMm::enabled) {
+                OotToMm::WriteCutscenes(writer, res, room, cmdSetCutscenes);
             }
             else {
                 Globals::Instance->GetSegmentedPtrName(cmdSetCutscenes->cmdArg2, room->parent, "CutsceneData", listName, res->parent->workerID);

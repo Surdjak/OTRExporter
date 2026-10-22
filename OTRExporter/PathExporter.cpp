@@ -1,6 +1,7 @@
 #include "PathExporter.h"
 #include "../ZAPD/ZFile.h"
 #include "Globals.h"
+#include "OotToMm.h"
 
 void OTRExporter_Path::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
@@ -16,6 +17,8 @@ void OTRExporter_Path::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 		if (Globals::Instance->game == ZGame::MM_RETAIL) {
 			writer->Write(path->pathways[k].unk1);
 			writer->Write(path->pathways[k].unk2);
+		} else if (OotToMm::enabled) {
+			OotToMm::WritePathExtras(writer, path->pathways[k]);
 		}
 		for (size_t i = 0; i < path->pathways[k].points.size(); i++)
 		{

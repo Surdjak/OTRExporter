@@ -5,6 +5,7 @@
 #include "RoomExporter.h"
 #include "CollisionExporter.h"
 #include "DisplayListExporter.h"
+#include "OotToMm.h"
 #include "PlayerAnimationExporter.h"
 #include "SkeletonExporter.h"
 #include "SkeletonLimbExporter.h"
@@ -290,6 +291,8 @@ static void ExporterParseArgs(int argc, char* argv[], int& i)
     } else if (arg == "--pathRoot") {
         OTRExporter_DisplayList::pathRoot = argv[i + 1];
         i++;
+    } else if (arg == "--convertToMm") {
+        OotToMm::enabled = true;
     }
 }
 
