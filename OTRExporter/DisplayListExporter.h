@@ -13,5 +13,8 @@ public:
 	static std::string GetParentFolderName(ZResource* res);
 	static std::string GetPathToRes(ZResource* res, std::string varName);
 	static std::string GetPrefix(ZResource* res);
+	static std::string ApplyPathRoot(const std::string& path);
+
+	static std::string pathRoot;
 
 };

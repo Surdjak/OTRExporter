@@ -287,6 +287,9 @@ static void ExporterParseArgs(int argc, char* argv[], int& i)
     } else if (arg == "--portVer") {
         portVersionString = argv[i + 1];
         i++;
+    } else if (arg == "--pathRoot") {
+        OTRExporter_DisplayList::pathRoot = argv[i + 1];
+        i++;
     }
 }
 

@@ -5,11 +5,8 @@
 #include <Utils/BinaryWriter.h>
 #include <libultraship/bridge.h>
 #include "VersionInfo.h"
-#ifdef GAME_MM
+// 2Ship's resource types are a superset of SoH's with the same values, so both games use them.
 #include "../../mm/2s2h/resource/type/2shResourceType.h"
-#elif GAME_OOT
-#include "../../soh/soh/resource/type/SohResourceType.h"
-#endif
 class OTRExporter : public ZResourceExporter
 {
 protected:

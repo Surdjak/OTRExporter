@@ -1,9 +1,5 @@
 #include "AnimationExporter.h"
-#ifdef GAME_MM
 #include <resource/type/Animation.h>
-#elif GAME_OOT
-#include "../../soh/soh/resource/type/Animation.h"
-#endif
 
 #include <Globals.h>
 #include "DisplayListExporter.h"
@@ -30,7 +26,8 @@ void OTRExporter_Animation::Save(ZResource* res, const fs::path& outPath, Binary
 			if (name.at(0) == '&')
 				name.erase(0, 1);
 
-			writer->Write(StringHelper::Sprintf("__OTR__misc/link_animetion/%s", name.c_str()));
+			writer->Write("__OTR__" + OTRExporter_DisplayList::ApplyPathRoot(
+			                              StringHelper::Sprintf("misc/link_animetion/%s", name.c_str())));
 		}
 		else
 		{

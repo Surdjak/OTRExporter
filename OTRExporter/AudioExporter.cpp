@@ -66,11 +66,12 @@ std::string OTRExporter_Audio::GetSampleEntryReference(ZAudio* audio, SampleEntr
     {
         if (audio->sampleOffsets[entry->bankId].contains(entry->sampleDataOffset) &&
             audio->sampleOffsets[entry->bankId][entry->sampleDataOffset] != "") {
-                return (StringHelper::Sprintf("audio/samples/%s_META",
+                return OTRExporter_DisplayList::ApplyPathRoot(StringHelper::Sprintf("audio/samples/%s_META",
                                           audio->sampleOffsets[entry->bankId][entry->sampleDataOffset].c_str()));
         }
         else
-            return StringHelper::Sprintf("audio/samples/sample_%d_%08X_META", entry->bankId, entry->sampleDataOffset);
+            return OTRExporter_DisplayList::ApplyPathRoot(
+                StringHelper::Sprintf("audio/samples/sample_%d_%08X_META", entry->bankId, entry->sampleDataOffset));
     }
     else
         return("");

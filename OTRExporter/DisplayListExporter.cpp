@@ -1021,7 +1021,7 @@ std::string OTRExporter_DisplayList::GetParentFolderName(ZResource* res)
 	return oName;
 }
 #ifdef GAME_MM
-std::string OTRExporter_DisplayList::GetPrefix(ZResource* res)
+static std::string GetGamePrefix(ZResource* res)
 {
 	std::string oName = res->parent->GetOutName();
 	std::string prefix = "";
@@ -1051,7 +1051,7 @@ std::string OTRExporter_DisplayList::GetPrefix(ZResource* res)
 	return prefix;
 }
 #elif GAME_OOT
-std::string OTRExporter_DisplayList::GetPrefix(ZResource* res)
+static std::string GetGamePrefix(ZResource* res)
 {
 	std::string oName = res->parent->GetOutName();
 	std::string prefix = "";
@@ -1087,3 +1087,22 @@ std::string OTRExporter_DisplayList::GetPrefix(ZResource* res)
 	return prefix;
 }
 #endif
+
+std::string OTRExporter_DisplayList::pathRoot = "";
+
+// Places every exported path under pathRoot so one game's archive can be loaded beside another's
+// without colliding.
+std::string OTRExporter_DisplayList::ApplyPathRoot(const std::string& path)
+{
+	if (pathRoot.empty())
+		return path;
+	if (path.empty())
+		return pathRoot;
+
+	return pathRoot + "/" + path;
+}
+
+std::string OTRExporter_DisplayList::GetPrefix(ZResource* res)
+{
+	return ApplyPathRoot(GetGamePrefix(res));
+}
