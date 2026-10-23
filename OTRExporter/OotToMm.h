@@ -32,10 +32,14 @@ uint16_t ActorId(uint16_t ootActorId);
 uint16_t ObjectId(uint16_t ootObjectId);
 
 // Spawn entries in MM store rotations as whole degrees in bits 7-15, with a cutscene id or half-day
-// bits below. OoT stores binary angles. Used for start positions and transition actors. Room actor
-// lists keep OoT's angles, which some OoT actors use as extra parameters; 2Ship spawns OoT actors from
-// them as they are (Actor_SpawnEntry).
+// bits below. OoT stores binary angles. Used for start positions, transition actors and room actors
+// mapped to MM's own. Other room actors keep OoT's angles, which some OoT actors use as extra
+// parameters; 2Ship spawns OoT actors from them as they are (Actor_SpawnEntry).
 uint16_t SpawnRotation(uint16_t ootAngle, uint8_t lowBits);
+// True for OoT actors that ActorId maps to MM's own actors.
+bool IsMmActor(uint16_t ootActorId);
+// Converts a room actor's parameters for actors that ActorId maps to MM's own (collectibles).
+uint16_t ActorParams(uint16_t ootActorId, uint16_t ootParams);
 // Converts a transition actor's parameters to its MM equivalent's layout.
 uint16_t TransitionParams(uint16_t ootActorId, uint16_t ootParams);
 

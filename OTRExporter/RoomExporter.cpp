@@ -95,10 +95,17 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
                 writer->Write(entry.posX);
                 writer->Write(entry.posY);
                 writer->Write(entry.posZ);
-                writer->Write(entry.rotX);
-                writer->Write(entry.rotY);
-                writer->Write(entry.rotZ);
-                writer->Write(entry.params);
+                // OoT actors keep OoT's rotations; actors mapped to MM's own need MM's spawn layout.
+                if (OotToMm::IsMmActor(entry.actorNum)) {
+                    writer->Write(OotToMm::SpawnRotation(entry.rotX, 0));
+                    writer->Write(OotToMm::SpawnRotation(entry.rotY, 0x7F));
+                    writer->Write(OotToMm::SpawnRotation(entry.rotZ, 0));
+                } else {
+                    writer->Write(entry.rotX);
+                    writer->Write(entry.rotY);
+                    writer->Write(entry.rotZ);
+                }
+                writer->Write(OotToMm::ActorParams(entry.actorNum, entry.params));
             }
         }
             break;
@@ -422,7 +429,7 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
                 writer->Write(OotToMm::SpawnRotation(entry.rotX, 0));
                 writer->Write(OotToMm::SpawnRotation(entry.rotY, 0x7F));
                 writer->Write(OotToMm::SpawnRotation(entry.rotZ, 0));
-                writer->Write(entry.params);
+                writer->Write(OotToMm::ActorParams(entry.actorNum, entry.params));
             }
         }
         break;

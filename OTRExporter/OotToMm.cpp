@@ -23,6 +23,8 @@ constexpr uint16_t OOT_ACTOR_PLAYER = 0x0000;
 constexpr uint16_t OOT_ACTOR_EN_HOLL = 0x0023;
 constexpr uint16_t MM_ACTOR_PLAYER = 0x0000;
 constexpr uint16_t MM_ACTOR_EN_HOLL = 0x0018;
+constexpr uint16_t OOT_ACTOR_EN_ITEM00 = 0x0015;
+constexpr uint16_t MM_ACTOR_EN_ITEM00 = 0x000E;
 } // namespace
 
 uint16_t ActorId(uint16_t ootActorId) {
@@ -36,6 +38,9 @@ uint16_t ActorId(uint16_t ootActorId) {
         // MM's room-loading planes stand in until OoT's are ported.
         case OOT_ACTOR_EN_HOLL:
             return MM_ACTOR_EN_HOLL;
+        // Collectibles are MM's En_Item00, with their type converted by ActorParams.
+        case OOT_ACTOR_EN_ITEM00:
+            return MM_ACTOR_EN_ITEM00;
         default:
             return ACTOR_OOT_BASE + ootActorId;
     }
@@ -47,6 +52,31 @@ uint16_t SpawnRotation(uint16_t ootAngle, uint8_t lowBits) {
     }
     uint32_t degrees = ((uint32_t)ootAngle * 360 + 0x8000) / 0x10000 % 360;
     return (uint16_t)((degrees << 7) | (lowBits & 0x7F));
+}
+
+bool IsMmActor(uint16_t ootActorId) {
+    return enabled && ActorId(ootActorId) < ACTOR_OOT_BASE;
+}
+
+uint16_t ActorParams(uint16_t ootActorId, uint16_t ootParams) {
+    if (!enabled || ootActorId != OOT_ACTOR_EN_ITEM00) {
+        return ootParams;
+    }
+    // MM's collectible for each of OoT's, which En_Item00 keeps in the low byte. MM's arrows come in
+    // bundles of 10 and 30, and MM has no Deku seeds, tunics or Deku shield.
+    static const uint8_t sMmItem00[] = {
+        /* RUPEE_GREEN */ 0x00,  /* RUPEE_BLUE */ 0x01,    /* RUPEE_RED */ 0x02,       /* HEART */ 0x03,
+        /* BOMBS_A */ 0x04,      /* ARROWS_SINGLE */ 0x05, /* HEART_PIECE */ 0x06,     /* HEART_CONTAINER */ 0x07,
+        /* ARROWS_SMALL */ 0x05, /* ARROWS_MEDIUM */ 0x05, /* ARROWS_LARGE */ 0x08,    /* BOMBS_B */ 0x0B,
+        /* NUTS */ 0x0C,         /* STICK */ 0x0D,         /* MAGIC_LARGE */ 0x0E,     /* MAGIC_SMALL */ 0x0F,
+        /* SEEDS */ 0x18,        /* SMALL_KEY */ 0x11,     /* FLEXIBLE */ 0x12,        /* RUPEE_ORANGE */ 0x13,
+        /* RUPEE_PURPLE */ 0x14, /* SHIELD_DEKU */ 0x16,   /* SHIELD_HYLIAN */ 0x16,   /* TUNIC_ZORA */ 0x18,
+        /* TUNIC_GORON */ 0x18,  /* BOMBS_SPECIAL */ 0x04,
+    };
+    uint8_t type = ootParams & 0xFF;
+    // The collectible flag (bits 8-13) sits where MM keeps it; 0x18 is MM's ITEM00_NOTHING.
+    uint8_t mmType = (type < sizeof(sMmItem00)) ? sMmItem00[type] : type;
+    return (uint16_t)((ootParams & 0xFF00) | mmType);
 }
 
 uint16_t TransitionParams(uint16_t ootActorId, uint16_t ootParams) {
