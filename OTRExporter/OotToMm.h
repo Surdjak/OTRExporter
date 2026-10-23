@@ -26,8 +26,8 @@ extern bool enabled;
 
 // These return their input unless enabled, so exporters can call them for either game.
 
-// Maps actors MM already has an equivalent of (so far the room-loading planes). Other ids pass
-// through. TODO: remap to the unified actor and object tables once OoT variants exist (suffixed _Oot).
+// Map OoT ids into 2Ship's unified tables, where OoT entries follow MM's (hyrule/HyruleIds.h). Player
+// and the room-loading planes map to MM's own actors instead.
 uint16_t ActorId(uint16_t ootActorId);
 uint16_t ObjectId(uint16_t ootObjectId);
 

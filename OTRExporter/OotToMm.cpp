@@ -11,6 +11,7 @@
 #include "CutsceneExporter.h"
 #include "DisplayListExporter.h"
 #include "Main.h"
+#include "../../hyrule/HyruleIds.h"
 #undef FindResource
 
 namespace OotToMm {
@@ -18,7 +19,9 @@ namespace OotToMm {
 bool enabled = false;
 
 namespace {
+constexpr uint16_t OOT_ACTOR_PLAYER = 0x0000;
 constexpr uint16_t OOT_ACTOR_EN_HOLL = 0x0023;
+constexpr uint16_t MM_ACTOR_PLAYER = 0x0000;
 constexpr uint16_t MM_ACTOR_EN_HOLL = 0x0018;
 } // namespace
 
@@ -27,10 +30,14 @@ uint16_t ActorId(uint16_t ootActorId) {
         return ootActorId;
     }
     switch (ootActorId) {
+        // Start positions spawn MM's Player.
+        case OOT_ACTOR_PLAYER:
+            return MM_ACTOR_PLAYER;
+        // MM's room-loading planes stand in until OoT's are ported.
         case OOT_ACTOR_EN_HOLL:
             return MM_ACTOR_EN_HOLL;
         default:
-            return ootActorId;
+            return ACTOR_OOT_BASE + ootActorId;
     }
 }
 
@@ -62,7 +69,7 @@ uint16_t ObjectId(uint16_t ootObjectId) {
     if (!enabled) {
         return ootObjectId;
     }
-    return ootObjectId;
+    return OBJECT_OOT_BASE + ootObjectId;
 }
 
 int16_t CameraSetting(int16_t ootSetting) {
