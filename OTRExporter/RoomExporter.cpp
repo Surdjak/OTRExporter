@@ -400,7 +400,9 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
             SetSpecialObjects* cmdSpecObj = (SetSpecialObjects*)cmd;
 
             writer->Write((uint8_t)cmdSpecObj->elfMessage); // 0x01
-            writer->Write((uint16_t)cmdSpecObj->globalObject); // 0x06
+            // 0 means no sub-keep object, so it is not mapped.
+            writer->Write(cmdSpecObj->globalObject == 0 ? (uint16_t)0
+                                                        : OotToMm::ObjectId(cmdSpecObj->globalObject)); // 0x06
         }
         break;
         case RoomCommand::SetStartPositionList:
