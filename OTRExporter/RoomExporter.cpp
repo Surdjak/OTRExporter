@@ -91,15 +91,15 @@ void OTRExporter_Room::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 
             for (const auto& entry : cmdSetActorList->actorList->actors)
             {
-                writer->Write(OotToMm::ActorId(entry.actorNum));
+                writer->Write(OotToMm::ActorId(entry.actorNum, entry.params));
                 writer->Write(entry.posX);
                 writer->Write(entry.posY);
                 writer->Write(entry.posZ);
                 // OoT actors keep OoT's rotations; actors mapped to MM's own need MM's spawn layout.
-                if (OotToMm::IsMmActor(entry.actorNum)) {
-                    writer->Write(OotToMm::SpawnRotation(entry.rotX, 0));
-                    writer->Write(OotToMm::SpawnRotation(entry.rotY, 0x7F));
-                    writer->Write(OotToMm::SpawnRotation(entry.rotZ, 0));
+                if (OotToMm::IsMmActor(entry.actorNum, entry.params)) {
+                    writer->Write(OotToMm::MmActorRotation(entry.actorNum, entry.params, 0, entry.rotX));
+                    writer->Write(OotToMm::MmActorRotation(entry.actorNum, entry.params, 1, entry.rotY));
+                    writer->Write(OotToMm::MmActorRotation(entry.actorNum, entry.params, 2, entry.rotZ));
                 } else {
                     writer->Write(entry.rotX);
                     writer->Write(entry.rotY);

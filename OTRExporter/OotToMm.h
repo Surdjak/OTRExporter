@@ -26,9 +26,10 @@ extern bool enabled;
 
 // These return their input unless enabled, so exporters can call them for either game.
 
-// Map OoT ids into 2Ship's unified tables, where OoT entries follow MM's (hyrule/HyruleIds.h). Player
-// and the room-loading planes map to MM's own actors instead.
-uint16_t ActorId(uint16_t ootActorId);
+// Map OoT ids into 2Ship's unified tables, where OoT entries follow MM's (hyrule/HyruleIds.h). Player,
+// the room-loading planes, collectibles and chests whose item MM has map to MM's own actors instead; a
+// chest's id then carries MM's flags for raw X and Z spawn rotations.
+uint16_t ActorId(uint16_t ootActorId, uint16_t ootParams = 0);
 uint16_t ObjectId(uint16_t ootObjectId);
 
 // Spawn entries in MM store rotations as whole degrees in bits 7-15, with a cutscene id or half-day
@@ -36,9 +37,12 @@ uint16_t ObjectId(uint16_t ootObjectId);
 // mapped to MM's own. Other room actors keep OoT's angles, which some OoT actors use as extra
 // parameters; 2Ship spawns OoT actors from them as they are (Actor_SpawnEntry).
 uint16_t SpawnRotation(uint16_t ootAngle, uint8_t lowBits);
+// A room actor's rotation (axis 0-2 for X, Y, Z) for an actor ActorId maps to MM's own: SpawnRotation, or
+// the raw value for rotations MM's actor reads as parameters (a chest's switch flag).
+uint16_t MmActorRotation(uint16_t ootActorId, uint16_t ootParams, int axis, uint16_t ootRot);
 // True for OoT actors that ActorId maps to MM's own actors.
-bool IsMmActor(uint16_t ootActorId);
-// Converts a room actor's parameters for actors that ActorId maps to MM's own (collectibles).
+bool IsMmActor(uint16_t ootActorId, uint16_t ootParams = 0);
+// Converts a room actor's parameters for actors that ActorId maps to MM's own (collectibles, chests).
 uint16_t ActorParams(uint16_t ootActorId, uint16_t ootParams);
 // Converts a transition actor's parameters to its MM equivalent's layout.
 uint16_t TransitionParams(uint16_t ootActorId, uint16_t ootParams);

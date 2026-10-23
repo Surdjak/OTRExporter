@@ -25,9 +25,59 @@ constexpr uint16_t MM_ACTOR_PLAYER = 0x0000;
 constexpr uint16_t MM_ACTOR_EN_HOLL = 0x0018;
 constexpr uint16_t OOT_ACTOR_EN_ITEM00 = 0x0015;
 constexpr uint16_t MM_ACTOR_EN_ITEM00 = 0x000E;
+constexpr uint16_t OOT_ACTOR_EN_BOX = 0x000A;
+constexpr uint16_t MM_ACTOR_EN_BOX = 0x0006;
+// MM spawn entry id flags: keep the X or Z rotation raw instead of converting it from degrees.
+constexpr uint16_t MM_ACTOR_ROT_X_RAW = 0x4000;
+constexpr uint16_t MM_ACTOR_ROT_Z_RAW = 0x2000;
+
+// MM's get-item id for each of OoT's that MM also has (shared consumables, keys, map and compass), or 0.
+// Chests holding anything else stay OoT actors until OoT's items are in the save.
+uint8_t MmGetItem(uint8_t ootGetItem) {
+    switch (ootGetItem) {
+        case 0x01: return 0x15; // BOMBS_5
+        case 0x02: return 0x29; // NUTS_5
+        case 0x03: return 0x1A; // BOMBCHUS_10
+        case 0x07: return 0x19; // STICKS_1 (MM: DEKU_STICKS_1)
+        case 0x3D: return 0x0D; // HEART_CONTAINER
+        case 0x3E: return 0x0C; // HEART_PIECE
+        case 0x3F: return 0x3D; // KEY_BOSS
+        case 0x40: return 0x3F; // COMPASS
+        case 0x41: return 0x3E; // MAP
+        case 0x42: return 0x3C; // KEY_SMALL
+        case 0x43: return 0x0E; // MAGIC_SMALL (MM: MAGIC_JAR_SMALL)
+        case 0x44: return 0x0F; // MAGIC_LARGE (MM: MAGIC_JAR_BIG)
+        case 0x48: return 0x0A; // HEART (MM: RECOVERY_HEART)
+        case 0x49: return 0x1E; // ARROWS_SMALL; MM's smallest bundle is 10 (ARROWS_10)
+        case 0x4A: return 0x1E; // ARROWS_MEDIUM (ARROWS_10)
+        case 0x4B: return 0x1F; // ARROWS_LARGE (ARROWS_30)
+        case 0x4C: return 0x01; // RUPEE_GREEN
+        case 0x4D: return 0x02; // RUPEE_BLUE
+        case 0x4E: return 0x04; // RUPEE_RED
+        case 0x4F: return 0x0D; // HEART_CONTAINER_2
+        case 0x55: return 0x05; // RUPEE_PURPLE
+        case 0x56: return 0x07; // RUPEE_GOLD, 200 (MM: RUPEE_HUGE)
+        case 0x63: return 0x29; // NUTS_5_2
+        case 0x64: return 0x2A; // NUTS_10
+        case 0x65: return 0x14; // BOMBS_1
+        case 0x66: return 0x16; // BOMBS_10
+        case 0x67: return 0x17; // BOMBS_20
+        case 0x68: return 0x18; // BOMBS_30
+        case 0x6A: return 0x3A; // BOMBCHUS_5
+        case 0x6B: return 0x2E; // BOMBCHUS_20
+        case 0x7C: return 0x76; // ICE_TRAP
+        default: return 0;
+    }
+}
+
+// OoT's and MM's En_Box share their parameter layout: type in bits 12-15, get-item id in 5-11, chest flag in
+// 0-4, and the switch flag in the Z rotation. Their chest types match too.
+uint8_t ChestGetItem(uint16_t params) {
+    return (params >> 5) & 0x7F;
+}
 } // namespace
 
-uint16_t ActorId(uint16_t ootActorId) {
+uint16_t ActorId(uint16_t ootActorId, uint16_t ootParams) {
     if (!enabled) {
         return ootActorId;
     }
@@ -41,6 +91,12 @@ uint16_t ActorId(uint16_t ootActorId) {
         // Collectibles are MM's En_Item00, with their type converted by ActorParams.
         case OOT_ACTOR_EN_ITEM00:
             return MM_ACTOR_EN_ITEM00;
+        // Chests are MM's En_Box when MM has their item, with the item converted by ActorParams.
+        case OOT_ACTOR_EN_BOX:
+            if (MmGetItem(ChestGetItem(ootParams)) != 0) {
+                return MM_ACTOR_EN_BOX | MM_ACTOR_ROT_X_RAW | MM_ACTOR_ROT_Z_RAW;
+            }
+            return ACTOR_OOT_BASE + ootActorId;
         default:
             return ACTOR_OOT_BASE + ootActorId;
     }
@@ -54,11 +110,23 @@ uint16_t SpawnRotation(uint16_t ootAngle, uint8_t lowBits) {
     return (uint16_t)((degrees << 7) | (lowBits & 0x7F));
 }
 
-bool IsMmActor(uint16_t ootActorId) {
-    return enabled && ActorId(ootActorId) < ACTOR_OOT_BASE;
+uint16_t MmActorRotation(uint16_t ootActorId, uint16_t ootParams, int axis, uint16_t ootRot) {
+    uint16_t flags = ActorId(ootActorId, ootParams);
+    if ((axis == 0 && (flags & MM_ACTOR_ROT_X_RAW)) || (axis == 2 && (flags & MM_ACTOR_ROT_Z_RAW))) {
+        // Raw values sit in the degree bits; the low bits (half-day bits) stay 0, meaning always.
+        return (uint16_t)((ootRot & 0x1FF) << 7);
+    }
+    return SpawnRotation(ootRot, (axis == 1) ? 0x7F : 0);
+}
+
+bool IsMmActor(uint16_t ootActorId, uint16_t ootParams) {
+    return enabled && (ActorId(ootActorId, ootParams) & 0x1FFF) < ACTOR_OOT_BASE;
 }
 
 uint16_t ActorParams(uint16_t ootActorId, uint16_t ootParams) {
+    if (enabled && ootActorId == OOT_ACTOR_EN_BOX && IsMmActor(ootActorId, ootParams)) {
+        return (uint16_t)((ootParams & ~(0x7F << 5)) | (MmGetItem(ChestGetItem(ootParams)) << 5));
+    }
     if (!enabled || ootActorId != OOT_ACTOR_EN_ITEM00) {
         return ootParams;
     }
@@ -98,6 +166,10 @@ uint16_t TransitionParams(uint16_t ootActorId, uint16_t ootParams) {
 uint16_t ObjectId(uint16_t ootObjectId) {
     if (!enabled) {
         return ootObjectId;
+    }
+    // Chests are MM's En_Box (ActorId), which uses MM's chest object. 0x000E is OoT's object_box, 0x000C MM's.
+    if (ootObjectId == 0x000E) {
+        return 0x000C;
     }
     return OBJECT_OOT_BASE + ootObjectId;
 }
