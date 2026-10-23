@@ -349,8 +349,9 @@ Message ConvertMessage(const std::string& ootMsg, uint8_t textboxType, uint8_t t
                 break;
             }
             case OOT_SHIFT:
+                // OoT shifts by pixels, MM by spaces, which are 6 pixels wide at MM's text scale.
                 mm += (char)MM_SHIFT;
-                mm += (char)arg[0];
+                mm += (char)((arg[0] + 3) / 6);
                 break;
             case OOT_TEXTID:
                 // TODO: confirm MM continues to nextMessageID the way OoT follows TEXTID.
