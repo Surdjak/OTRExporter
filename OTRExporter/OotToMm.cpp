@@ -194,10 +194,10 @@ void WriteRoomBehavior(BinaryWriter* writer, SetRoomBehavior* cmd) {
 }
 
 void WriteMiscSettings(BinaryWriter* writer, SetCameraSettings* cmd) {
-    // MM's 0x19 (SetWorldMapVisited) has no payload. TODO: carry OoT's scene camera type
-    // (cmd->cameraMovement) and world map area (cmd->mapHighlight) somewhere MM's engine reads them.
-    (void)writer;
-    (void)cmd;
+    // MM's 0x19 (SetWorldMapVisited) has no payload; 2Ship reads OoT's scene camera type and world map area
+    // after it for scenes under the oot/ path, as SoH does.
+    writer->Write((uint8_t)cmd->cameraMovement);
+    writer->Write(cmd->mapHighlight);
 }
 
 void WriteCutscenes(BinaryWriter* writer, ZResource* res, ZRoom* room, SetCutscenes* cmd) {
