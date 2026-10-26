@@ -131,13 +131,14 @@ uint16_t ActorParams(uint16_t ootActorId, uint16_t ootParams) {
         return ootParams;
     }
     // MM's collectible for each of OoT's, which En_Item00 keeps in the low byte. MM's arrows come in
-    // bundles of 10 and 30, and MM has no Deku seeds, tunics or Deku shield.
+    // bundles of 10 and 30, MM has no tunics or Deku shield, and OoT's Deku Seeds are 3Ship's 0x1E
+    // (ITEM00_DEKU_SEEDS_Oot).
     static const uint8_t sMmItem00[] = {
         /* RUPEE_GREEN */ 0x00,  /* RUPEE_BLUE */ 0x01,    /* RUPEE_RED */ 0x02,       /* HEART */ 0x03,
         /* BOMBS_A */ 0x04,      /* ARROWS_SINGLE */ 0x05, /* HEART_PIECE */ 0x06,     /* HEART_CONTAINER */ 0x07,
         /* ARROWS_SMALL */ 0x05, /* ARROWS_MEDIUM */ 0x05, /* ARROWS_LARGE */ 0x08,    /* BOMBS_B */ 0x0B,
         /* NUTS */ 0x0C,         /* STICK */ 0x0D,         /* MAGIC_LARGE */ 0x0E,     /* MAGIC_SMALL */ 0x0F,
-        /* SEEDS */ 0x18,        /* SMALL_KEY */ 0x11,     /* FLEXIBLE */ 0x12,        /* RUPEE_ORANGE */ 0x13,
+        /* SEEDS */ 0x1E,        /* SMALL_KEY */ 0x11,     /* FLEXIBLE */ 0x12,        /* RUPEE_ORANGE */ 0x13,
         /* RUPEE_PURPLE */ 0x14, /* SHIELD_DEKU */ 0x16,   /* SHIELD_HYLIAN */ 0x16,   /* TUNIC_ZORA */ 0x18,
         /* TUNIC_GORON */ 0x18,  /* BOMBS_SPECIAL */ 0x04,
     };
@@ -404,10 +405,12 @@ bool ConvertColor(uint8_t ootArg, uint8_t& mmCode) {
 
 Message ConvertMessage(const std::string& ootMsg, uint8_t textboxType, uint8_t textboxYPos,
                        std::vector<uint8_t>& unconverted) {
-    // TODO: map OoT textbox types and positions onto MM's, which do not match one to one.
+    // TODO: map OoT textbox types onto MM's, which do not match one to one.
     Message out;
     out.textboxType = textboxType;
-    out.textboxYPos = textboxYPos;
+    // MM's header byte holds the position in its high nibble (variable, top, middle, bottom, as OoT's) and flags in
+    // its low nibble, where 1 and 3 make the text unskippable and 3 fades it in (Message_OpenText).
+    out.textboxYPos = (uint8_t)(textboxYPos << 4);
 
     std::string& mm = out.msg;
     size_t i = 0;
