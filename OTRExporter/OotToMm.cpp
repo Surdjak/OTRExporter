@@ -274,9 +274,9 @@ void WriteMiscSettings(BinaryWriter* writer, SetCameraSettings* cmd) {
 }
 
 void WriteCutscenes(BinaryWriter* writer, ZResource* res, ZRoom* room, SetCutscenes* cmd) {
-    // MM lists cutscenes in a custom 0x1F command; OoT points at a single cutscene. OoT starts scene
-    // cutscenes from the entrance cutscene table rather than from this entry, so the exit, entrance
-    // and flag fields are left unset. TODO: decide how OoT entrance cutscenes trigger in MM.
+    // MM lists cutscenes in a custom 0x1F command; OoT points at a single cutscene, its scene layer's, which
+    // 2Ship's OoT interpreter plays from the list's first entry. OoT starts it from the layer, not from MM's
+    // entrance and flag fields, which are left unset.
     writer->Seek(-4, SeekOffsetType::Current);
     writer->Write((uint32_t)RoomCommand::SetCutscenesMM);
     writer->Write((uint8_t)1);
@@ -529,22 +529,6 @@ Message ConvertMessage(const std::string& ootMsg, uint8_t textboxType, uint8_t t
     // A well-formed OoT message always ends in OOT_END.
     mm += (char)MM_END;
     return out;
-}
-
-uint32_t WriteCutsceneCommands(BinaryWriter* writer, ZCutscene* cs) {
-    // TODO: translate OoT cutscene commands. Until then every command is skipped, leaving an MM
-    // cutscene that only runs to its end frame.
-    (void)writer;
-    std::string skipped;
-    for (const auto* cmd : cs->commands) {
-        skipped += StringHelper::Sprintf(" 0x%X", cmd->commandID);
-    }
-    if (!skipped.empty()) {
-        // Cutscenes reached through a room's cutscene command have no name of their own.
-        printf("OotToMm: cutscene %s:0x%X not converted, skipped commands:%s\n", cs->parent->GetName().c_str(),
-               (uint32_t)cs->GetRawDataIndex(), skipped.c_str());
-    }
-    return 0;
 }
 
 } // namespace OotToMm

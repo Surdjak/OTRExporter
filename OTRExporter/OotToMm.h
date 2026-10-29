@@ -2,7 +2,8 @@
 
 // Converts OoT data into MM's formats while OoT mode exports it (--convertToMm), so 2Ship can load
 // Hyrule resources without OoT-specific importers. Everything here is a skeleton: formats are
-// converted, but game semantics (IDs, flags, sound effects, cutscene commands) mostly are not yet.
+// converted, but game semantics (IDs, flags, sound effects) mostly are not yet. Cutscenes stay in
+// OoT's format, for 2Ship's OoT interpreter.
 
 #include <cstdint>
 #include <string>
@@ -10,7 +11,6 @@
 
 #include <Utils/BinaryWriter.h>
 
-class ZCutscene;
 class ZResource;
 class ZRoom;
 class SetCameraSettings;
@@ -79,10 +79,5 @@ struct Message {
 // equivalent are dropped and their bytes are added to unconverted.
 Message ConvertMessage(const std::string& ootMsg, uint8_t textboxType, uint8_t textboxYPos,
                        std::vector<uint8_t>& unconverted);
-
-// Cutscenes
-
-// Stub: writes the commands of an empty MM cutscene and returns how many it wrote.
-uint32_t WriteCutsceneCommands(BinaryWriter* writer, ZCutscene* cs);
 
 } // namespace OotToMm
