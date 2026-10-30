@@ -499,7 +499,7 @@ Message ConvertMessage(const std::string& ootMsg, uint8_t textboxType, uint8_t t
                 mm += (char)arg[1];
                 break;
             case OOT_ITEM_ICON:
-                // TODO: remap OoT item ids to the unified item table.
+                // OoT's item id: 2Ship maps it to an icon for OoT's texts (Hyrule_MessageIconFromOot).
                 out.icon = arg[0];
                 break;
             case OOT_TOKENS:
