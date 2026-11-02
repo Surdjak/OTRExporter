@@ -403,6 +403,36 @@ bool ConvertColor(uint8_t ootArg, uint8_t& mmCode) {
 }
 } // namespace
 
+std::string RenameMessage(uint16_t id, const std::string& ootMsg) {
+    // The song Zelda teaches is MM's Song of Double Time (docs/SONGS.md): its lesson, OoT's "You played" text and
+    // the altar's inscription name it so, broken after "Double" as MM's own texts break it.
+    if ((id != 0x00D5) && (id != 0x089D) && (id != 0x7040)) {
+        return ootMsg;
+    }
+    std::string msg = ootMsg;
+    const std::string from = "Song of Time";
+    size_t at = msg.find(from);
+    if (at == std::string::npos) {
+        return msg;
+    }
+    // The second line keeps the indent (OoT's shift code) the message gave its first line.
+    std::string indent;
+    size_t shift = msg.rfind((char)OOT_SHIFT, at);
+    if ((shift != std::string::npos) && (msg.find((char)OOT_NEWLINE) > at)) {
+        indent = msg.substr(shift, 2);
+    }
+    msg.replace(at, from.size(), std::string("Song of Double") + (char)OOT_NEWLINE + indent + "Time");
+    if (id == 0x089D) {
+        // Its box keeps four lines: the name's second line takes one of the blank ones after it.
+        const std::string blanks(3, (char)OOT_NEWLINE);
+        size_t blank = msg.find(blanks, at);
+        if (blank != std::string::npos) {
+            msg.erase(blank, 1);
+        }
+    }
+    return msg;
+}
+
 Message ConvertMessage(const std::string& ootMsg, uint8_t textboxType, uint8_t textboxYPos,
                        std::vector<uint8_t>& unconverted) {
     // TODO: map OoT textbox types onto MM's, which do not match one to one.

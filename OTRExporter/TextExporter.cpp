@@ -17,7 +17,8 @@ void OTRExporter_Text::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 		for (size_t i = 0; i < txt->messages.size(); i++)
 		{
 			std::vector<uint8_t> unconverted;
-			OotToMm::Message msg = OotToMm::ConvertMessage(txt->messages[i].msg, txt->messages[i].textboxType,
+			OotToMm::Message msg = OotToMm::ConvertMessage(OotToMm::RenameMessage(txt->messages[i].id, txt->messages[i].msg),
+			                                               txt->messages[i].textboxType,
 			                                               txt->messages[i].textboxYPos, unconverted);
 			for (uint8_t code : unconverted)
 				unconvertedCounts[code]++;

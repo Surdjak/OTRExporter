@@ -75,6 +75,9 @@ struct Message {
     uint16_t secondItemCost = 0xFFFF;
 };
 
+// OoT's message body with 3Ship's renames (OoT's Song of Time is MM's Song of Double Time), before ConvertMessage.
+std::string RenameMessage(uint16_t id, const std::string& ootMsg);
+
 // Translates an OoT message body (ending in 0x02) into an MM one (ending in 0xBF). Codes with no MM
 // equivalent are dropped and their bytes are added to unconverted.
 Message ConvertMessage(const std::string& ootMsg, uint8_t textboxType, uint8_t textboxYPos,
