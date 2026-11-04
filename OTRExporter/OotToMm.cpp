@@ -209,7 +209,7 @@ int16_t CameraSetting(int16_t ootSetting) {
         /* 0x18 CIRCLE3                   */ 0x25, // CIRCLE3
         /* 0x19 PREREND0                  */ 0x06, // PREREND_FIXED
         /* 0x1A PREREND1                  */ 0x07, // PREREND_PIVOT
-        /* 0x1B PREREND3                  */ 0x07, // TODO: MM has no side-scrolling prerendered camera
+        /* 0x1B PREREND3                  */ 0x5B, // PREREND_SIDE_SCROLL, 3Ship's port of OoT's (Camera_Special6)
         /* 0x1C DOOR0                     */ 0x08, // DOORC
         /* 0x1D DOORC                     */ 0x08, // DOORC
         /* 0x1E RAIL3 (crawlspace)        */ 0x01, // TODO: MM has no crawlspace camera
