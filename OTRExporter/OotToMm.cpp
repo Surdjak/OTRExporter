@@ -205,7 +205,7 @@ int16_t CameraSetting(int16_t ootSetting) {
         /* 0x14 FIXED0                    */ 0x0F, // FIXED0
         /* 0x15 FIXED1                    */ 0x1F, // FIXED1
         /* 0x16 CIRCLE0                   */ 0x0E, // CIRCLE0
-        /* 0x17 CIRCLE2                   */ 0x24, // CIRCLE2
+        /* 0x17 CIRCLE2                   */ 0x5C, // PIVOT_SHOP_BROWSING, 3Ship's port of OoT's (Camera_Data4)
         /* 0x18 CIRCLE3                   */ 0x25, // CIRCLE3
         /* 0x19 PREREND0                  */ 0x06, // PREREND_FIXED
         /* 0x1A PREREND1                  */ 0x07, // PREREND_PIVOT
@@ -246,7 +246,7 @@ int16_t CameraSetting(int16_t ootSetting) {
         /* 0x3D UO_FIBER                  */ 0x11, // TODO: Jabu-Jabu tentacle rooms use DUNGEON0
         /* 0x3E DUNGEON2                  */ 0x32, // DUNGEON2
         /* 0x3F TEPPEN                    */ 0x01, // TODO: MM has no fixed-yaw camera
-        /* 0x40 CIRCLE7                   */ 0x36, // CIRCLE7
+        /* 0x40 CIRCLE7                   */ 0x5D, // PIVOT_FROM_SIDE, 3Ship's port of OoT's (Camera_Fixed4)
         /* 0x41 NORMAL4                   */ 0x58, // NORMAL4
     };
     if (ootSetting < 0 || ootSetting >= (int16_t)(sizeof(sMmSettings) / sizeof(sMmSettings[0]))) {
