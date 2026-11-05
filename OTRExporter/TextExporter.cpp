@@ -13,13 +13,26 @@ void OTRExporter_Text::Save(ZResource* res, const fs::path& outPath, BinaryWrite
 
 		writer->Write((uint32_t)txt->messages.size());
 
+		// MM's credits (staff_message_data_static) keep OoT's text encoding and header, so OoT's credits stay as they are;
+		// its dialogue takes MM's encoding.
+		const bool isCredits = txt->GetName().find("staff_message_data_static") != std::string::npos;
+
 		std::map<uint8_t, size_t> unconvertedCounts;
 		for (size_t i = 0; i < txt->messages.size(); i++)
 		{
 			std::vector<uint8_t> unconverted;
-			OotToMm::Message msg = OotToMm::ConvertMessage(OotToMm::RenameMessage(txt->messages[i].id, txt->messages[i].msg),
-			                                               txt->messages[i].textboxType,
-			                                               txt->messages[i].textboxYPos, unconverted);
+			OotToMm::Message msg;
+			if (isCredits)
+			{
+				msg.msg = txt->messages[i].msg;
+				msg.textboxType = txt->messages[i].textboxType;
+				msg.textboxYPos = txt->messages[i].textboxYPos;
+			}
+			else
+			{
+				msg = OotToMm::ConvertMessage(OotToMm::RenameMessage(txt->messages[i].id, txt->messages[i].msg),
+				                              txt->messages[i].textboxType, txt->messages[i].textboxYPos, unconverted);
+			}
 			for (uint8_t code : unconverted)
 				unconvertedCounts[code]++;
 
