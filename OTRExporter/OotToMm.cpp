@@ -75,6 +75,11 @@ uint8_t MmGetItem(uint8_t ootGetItem) {
 uint8_t ChestGetItem(uint16_t params) {
     return (params >> 5) & 0x7F;
 }
+
+bool ChestIsSongChest(uint16_t params) {
+    uint8_t type = params >> 12;
+    return (type == 9) || (type == 10);
+}
 } // namespace
 
 uint16_t ActorId(uint16_t ootActorId, uint16_t ootParams) {
@@ -91,9 +96,10 @@ uint16_t ActorId(uint16_t ootActorId, uint16_t ootParams) {
         // Collectibles are MM's En_Item00, with their type converted by ActorParams.
         case OOT_ACTOR_EN_ITEM00:
             return MM_ACTOR_EN_ITEM00;
-        // Chests are MM's En_Box when MM has their item, with the item converted by ActorParams.
+        // Chests are MM's En_Box when MM has their item, with the item converted by ActorParams. Song chests (types 9
+        // and 10, Zelda's Lullaby and the Sun's Song) stay OoT's: MM's En_Box never implemented them.
         case OOT_ACTOR_EN_BOX:
-            if (MmGetItem(ChestGetItem(ootParams)) != 0) {
+            if ((MmGetItem(ChestGetItem(ootParams)) != 0) && !ChestIsSongChest(ootParams)) {
                 return MM_ACTOR_EN_BOX | MM_ACTOR_ROT_X_RAW | MM_ACTOR_ROT_Z_RAW;
             }
             return ACTOR_OOT_BASE + ootActorId;
