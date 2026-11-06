@@ -27,6 +27,8 @@ constexpr uint16_t OOT_ACTOR_EN_ITEM00 = 0x0015;
 constexpr uint16_t MM_ACTOR_EN_ITEM00 = 0x000E;
 constexpr uint16_t OOT_ACTOR_EN_BOX = 0x000A;
 constexpr uint16_t MM_ACTOR_EN_BOX = 0x0006;
+constexpr uint16_t OOT_ACTOR_EN_HORSE = 0x0014;
+constexpr uint16_t MM_ACTOR_EN_HORSE = 0x000D;
 // MM spawn entry id flags: keep the X or Z rotation raw instead of converting it from degrees.
 constexpr uint16_t MM_ACTOR_ROT_X_RAW = 0x4000;
 constexpr uint16_t MM_ACTOR_ROT_Z_RAW = 0x2000;
@@ -103,6 +105,10 @@ uint16_t ActorId(uint16_t ootActorId, uint16_t ootParams) {
                 return MM_ACTOR_EN_BOX | MM_ACTOR_ROT_X_RAW | MM_ACTOR_ROT_Z_RAW;
             }
             return ACTOR_OOT_BASE + ootActorId;
+        // Horses are MM's En_Horse, which MM's Player rides in both worlds (docs/EPONA.md), with their params
+        // converted by ActorParams.
+        case OOT_ACTOR_EN_HORSE:
+            return MM_ACTOR_EN_HORSE;
         default:
             return ACTOR_OOT_BASE + ootActorId;
     }
@@ -129,7 +135,39 @@ bool IsMmActor(uint16_t ootActorId, uint16_t ootParams) {
     return enabled && (ActorId(ootActorId, ootParams) & 0x1FFF) < ACTOR_OOT_BASE;
 }
 
+// OoT's horse params in MM's En_Horse's: OoT's 0x8000 (its Ingo horse) is 3Ship's ENHORSE_PARAM_HNI_OOT (0x1000),
+// otherwise Epona (MM's ENHORSE_PARAM_4000); OoT's types 1-3 keep their numbers, 5 is MM's plain ENHORSE_17, 6 MM's
+// ENHORSE_8, 7 (cutscenes) MM's ENHORSE_9 and 8 (horseback archery) MM's ENHORSE_10. OoT's 0x7FFF means 1.
+static uint16_t HorseParams(uint16_t ootParams) {
+    uint16_t type = (ootParams & 0x8000) ? 0x1000 : 0x4000;
+    uint16_t low = ootParams & 0x7FFF;
+    switch (low) {
+        case 2:
+        case 3:
+            break;
+        case 5:
+            low = 17;
+            break;
+        case 6:
+            low = 8;
+            break;
+        case 7:
+            low = 9;
+            break;
+        case 8:
+            low = 10;
+            break;
+        default:
+            low = 1;
+            break;
+    }
+    return (uint16_t)(type | low);
+}
+
 uint16_t ActorParams(uint16_t ootActorId, uint16_t ootParams) {
+    if (enabled && ootActorId == OOT_ACTOR_EN_HORSE) {
+        return HorseParams(ootParams);
+    }
     if (enabled && ootActorId == OOT_ACTOR_EN_BOX && IsMmActor(ootActorId, ootParams)) {
         return (uint16_t)((ootParams & ~(0x7F << 5)) | (MmGetItem(ChestGetItem(ootParams)) << 5));
     }
